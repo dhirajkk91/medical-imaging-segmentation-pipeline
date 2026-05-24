@@ -1,60 +1,90 @@
-# Img_proc_V1 Notebook Explanation
+# OsteoVision: Dental X-ray Osteoporosis Detection
 
-This notebook contains a complete pipeline for processing panoramic bone images and extracting regions of interest along the cortex. The focus is on image enhancement, edge-based cortex path detection, sampling points along the detected cortex, and generating fixed-size crop boxes around those points.
+A work-in-progress machine learning research repository focused on building a low-cost osteoporosis screening pipeline from panoramic dental X-ray images.
 
-## What is being done
+## Why this matters
 
-1. Preprocessing:
-   - The input image is loaded in grayscale.
-   - Contrast is enhanced using CLAHE to improve local detail.
-   - A large morphological opening is used to estimate background illumination.
-   - The background is subtracted and the result is normalized to a full intensity range.
+Osteoporosis is typically diagnosed using DXA machines, which are expensive and not widely available in many clinics. This project explores a new direction, using routine panoramic dental X-rays to predict osteoporosis risk through mandible segmentation and radiographic analysis.
 
-2. Edge score computation:
-   - A vertical Sobel filter is applied to a central search band in the image.
-   - Absolute gradient magnitudes are computed to highlight cortex-like edges.
-   - A small bias is added to favor lower rows, which helps keep the detected path on the lower cortex surface.
+> The goal is to make an osteoporosis screening solution available at every dental visit, enabling earlier referral and better preventive care.
 
-3. Path fitting with dynamic programming:
-   - Two separate horizontal image regions are defined for the left and right cortical zones.
-   - For each side, a dynamic programming routine selects a smooth path through the edge score volume.
-   - The path is smoothed with a 1D filter to reduce jitter.
+## Project overview
 
-4. Sampling crop centers:
-   - The fitted left and right cortex paths are sampled at evenly spaced column positions.
-   - A configurable number of sample points is produced, balancing left and right sides.
+This repository captures the initial phases of a broader pipeline:
 
-5. Box generation and extraction:
-   - Fixed-size boxes are centered on the sampled points.
-   - A vertical shift parameter allows the box center to move relative to the detected cortex location.
-   - Image crops are extracted from the processed panoramic image.
+- Data preparation using the DatasetNinja annotated dental X-ray dataset
+- Mandible segmentation and ROI extraction
+- Training of multiple segmentation-based models
+- Ongoing work toward a final osteoporosis classification model
 
-6. Visualization and debugging:
-   - A debug overlay is created on the original grayscale image.
-   - The overlay draws the search zones, the detected cortex paths, sampled points, and crop boxes.
-   - This provides a visual check of how the cortex is being followed and where crops are selected.
+Current repository contents:
 
-7. Batch processing support:
-   - The notebook includes a loop that iterates over an input image folder.
-   - For each image, the cortex-following pipeline is applied and a debug image is saved.
+- `panoramic-dental-x-rays-DatasetNinja/`: annotated panoramic dental images used for segmentation training
+- `models/`: trained model weights and notebooks with model training code
+- `data_prep_DatasetNinja/`: notebook for dataset preparation and annotation processing
 
-## Parameters and control points
+> Note: `Osteo_PR_Dataset/` and `masks/` are large data folders and are intentionally excluded from version control. They are generated or downloaded outside the repository to keep the Git history lightweight.
 
-- `left_range` and `right_range` define the horizontal search windows for the left and right cortex.
-- `search_y_ratio` defines the vertical band where the cortex edge score is computed.
-- `smooth_penalty` and `max_step` control the smoothness of the dynamic programming path.
-- `smooth_k` controls final path smoothing after dynamic programming.
-- `max_points_total` sets how many crop centers are sampled from both sides.
-- `box_w`, `box_h`, and `vertical_shift` determine the size and vertical position of the extracted patches.
+## What has been done so far
 
-## Key functions in the notebook
+- Collected and curated a dental X-ray dataset for mandible segmentation
+- Implemented a segmentation training pipeline with UNet++ and EfficientNet-B4
+- Established a reproducible train/validation split using `splits.json`
+- Saved model checkpoints for iterative improvement and comparison
 
-- `preprocess_panoramic`: prepares the grayscale panoramic image for edge-based detection.
-- `build_edge_score`: computes the edge strength map and adds a row bias.
-- `find_best_path_dp`: finds a smooth path through the score image using dynamic programming.
-- `fit_cortex_paths`: applies path fitting to left and right search zones.
-- `build_boxes_from_points`: converts sampled points into crop rectangles.
-- `draw_debug_overlay`: creates the annotated visualization used for debugging.
-- `process_one_image_follow_cortex`: orchestrates the full pipeline for a single image.
+## What is still in progress
 
-This explanation is intended to describe the notebook workflow and the role of each major stage without turning the document into a formal usage guide.
+This repository intentionally remains incomplete in the clinical prediction stage. The current focus is on building the best segmentation backbone before finalizing the osteoporosis detection model.
+
+### Next steps
+
+- Evaluate segmentation models across multiple backbones
+- Select the best-performing architecture for final retraining
+- Build the osteoporosis classification head using segmented mandible features
+- Validate predictions against clinical DXA labels or proxy measures
+
+## Quick start
+
+1. Create a clean Python environment:
+
+```bash
+python -m venv .venv
+.\.venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+2. Open the main model notebook:
+
+- `models/unet++_efficientb4.ipynb`
+
+3. Run the data preparation notebook to generate masks and `splits.json`:
+
+- `data_prep_DatasetNinja/data_prep_DatasetNinja.ipynb`
+
+4. The notebook creates the required `masks/` folder and `splits.json` for training.
+
+5. Track experiments using the saved model files in `models/`.
+
+## Dependencies
+
+- Python 3.11+
+- PyTorch
+- `segmentation-models-pytorch`
+- `albumentations`
+- OpenCV
+- NumPy
+- scikit-learn
+- Matplotlib
+
+## Vision and impact
+
+This project is designed to impress by combining real-world medical imaging, modern deep learning architectures, and a compelling clinical narrative:
+
+- dental X-rays are already common in dental clinics
+- osteoporosis screening could be offered without adding a second specialized appointment
+- a successful pipeline would make early detection more accessible and affordable
+
+> The final product will connect dental radiology to osteoporosis risk prediction, making this a potentially revolutionary addition to preventive healthcare.
+
+
+

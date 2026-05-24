@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg
+*.egg-info/
+*.manifest
+*.spec
+venv/
+.env
+.venv/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Logs
+*.log
+
+# PyTorch
+*.pt
+*.pth
+
+# Large dataset folders
+masks/
+Osteo_PR_Dataset/
+
+# OS files
+.DS_Store
+Thumbs.db
