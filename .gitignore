@@ -33,6 +33,7 @@ dist/
 # Large dataset folders
 masks/
 Osteo_PR_Dataset/
+Osteo_PR_Dataset_Cropped/
 
 # OS files
 .DS_Store

@@ -1,47 +1,51 @@
-# OsteoVision: Dental X-ray Osteoporosis Detection
+# OsteoVision: Dental X-ray Osteoporosis Screening
 
-A work-in-progress machine learning research repository focused on building a low-cost osteoporosis screening pipeline from panoramic dental X-ray images.
+A machine learning research repository documenting a pipeline from segmentation to ROI extraction and the next stage of osteoporosis prediction.
 
 ## Why this matters
 
-Osteoporosis is typically diagnosed using DXA machines, which are expensive and not widely available in many clinics. This project explores a new direction, using routine panoramic dental X-rays to predict osteoporosis risk through mandible segmentation and radiographic analysis.
-
-> The goal is to make an osteoporosis screening solution available at every dental visit, enabling earlier referral and better preventive care.
+Osteoporosis screening currently relies on DXA scanners, which are expensive and not always available. This project explores whether panoramic dental X-rays can support a lower-cost screening workflow by extracting the mandible region and using it for model development.
 
 ## Project overview
 
-This repository captures the initial phases of a broader pipeline:
+This repository has a two-phase pipeline:
 
-- Data preparation using the DatasetNinja annotated dental X-ray dataset
-- Mandible segmentation and ROI extraction
-- Training of multiple segmentation-based models
-- Ongoing work toward a final osteoporosis classification model
+- training and comparing segmentation models on annotated dental X-rays
+- selecting the best segmentation backbone for mandible ROI extraction
+- applying the chosen segmentation output to crop dental X-rays
+- preparing for the next phase: osteoporosis classification on cropped images
 
-Current repository contents:
+Current repository highlights:
 
-- `panoramic-dental-x-rays-DatasetNinja/`: annotated panoramic dental images used for segmentation training
-- `models/`: trained model weights and notebooks with model training code
-- `data_prep_DatasetNinja/`: notebook for dataset preparation and annotation processing
+- `models/deeplabv3plus_efficientb4.ipynb`: the top-performing segmentation notebook
+- `models/unet++_efficientb4.ipynb` and `models/unet_efficientb4.ipynb`: additional segmentation experiments
+- `models/unet_resnet50.ipynb`: backbone comparison with a ResNet variant
+- `cropping/segment_and_crop.ipynb`: the pipeline that segments and crops the mandible ROI
+- `Osteo_PR_Dataset_Cropped/`: generated cropped ROI images for the next osteoporosis model
+- `models/`: saved segmentation checkpoints and experiment notebooks
+- `data_prep_DatasetNinja/`: dataset preparation and annotation conversion
 
-> Note: `Osteo_PR_Dataset/` and `masks/` are large data folders and are intentionally excluded from version control. They are generated or downloaded outside the repository to keep the Git history lightweight.
+> Note: `Osteo_PR_Dataset/`, `Osteo_PR_Dataset_Cropped/`, and `masks/` contain large data and are not tracked in Git.
 
 ## What has been done so far
 
-- Collected and curated a dental X-ray dataset for mandible segmentation
-- Implemented a segmentation training pipeline with UNet++ and EfficientNet-B4
-- Established a reproducible train/validation split using `splits.json`
-- Saved model checkpoints for iterative improvement and comparison
+- Trained multiple segmentation architectures, including UNet, UNet++, DeepLabV3+, and ResNet50-backed variants
+- Identified `deeplabv3plus_efficientb4` as the best-performing segmentation model for this dataset
+- Built a reproducible cropping pipeline to convert segmented masks into focused ROI images
+- Generated the cropped image folder `Osteo_PR_Dataset_Cropped/` for downstream osteoporosis model training
+- Saved the best segmentation checkpoint in `models/deeplabv3plus_efficientb4.pth`
+- Established a clean training workflow with `splits.json` for reproducibility
 
-## What is still in progress
+## Next phase: osteoporosis prediction
 
-This repository intentionally remains incomplete in the clinical prediction stage. The current focus is on building the best segmentation backbone before finalizing the osteoporosis detection model.
+The best segmentation model has been selected and the cropped mandible ROI is ready. The next step is to use the cropped X-rays for a classification model that predicts osteoporosis risk from the segmented mandible region.
 
-### Next steps
+Planned steps:
 
-- Evaluate segmentation models across multiple backbones
-- Select the best-performing architecture for final retraining
-- Build the osteoporosis classification head using segmented mandible features
-- Validate predictions against clinical DXA labels or proxy measures
+- design or fine-tune a classification network on cropped ROI images
+- use the segmented mandible region instead of raw panoramic X-rays
+- compare performance with and without ROI cropping
+- document the final osteoporosis prediction approach and results
 
 ## Quick start
 
@@ -53,38 +57,31 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-2. Open the main model notebook:
+2. Explore the best segmentation model notebook:
 
-- `models/unet++_efficientb4.ipynb`
+- `models/deeplabv3plus_efficientb4.ipynb`
 
-3. Run the data preparation notebook to generate masks and `splits.json`:
+3. Run the cropping workflow to generate focused mandible images:
 
-- `data_prep_DatasetNinja/data_prep_DatasetNinja.ipynb`
+- `cropping/segment_and_crop.ipynb`
 
-4. The notebook creates the required `masks/` folder and `splits.json` for training.
-
-5. Track experiments using the saved model files in `models/`.
+4. Use the cropped image outputs as the input dataset for the next osteoporosis classification model.
 
 ## Dependencies
 
 - Python 3.11+
 - PyTorch
+- `torchvision`
 - `segmentation-models-pytorch`
 - `albumentations`
-- OpenCV
-- NumPy
-- scikit-learn
-- Matplotlib
-
-## Vision and impact
-
-This project is designed to impress by combining real-world medical imaging, modern deep learning architectures, and a compelling clinical narrative:
-
-- dental X-rays are already common in dental clinics
-- osteoporosis screening could be offered without adding a second specialized appointment
-- a successful pipeline would make early detection more accessible and affordable
-
-> The final product will connect dental radiology to osteoporosis risk prediction, making this a potentially revolutionary addition to preventive healthcare.
+- `opencv-python`
+- `numpy`
+- `pandas`
+- `scikit-learn`
+- `matplotlib`
+- `jupyter`
+- `notebook`
+- `Pillow`
 
 
 
